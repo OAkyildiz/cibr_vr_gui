@@ -41,7 +41,7 @@ import sensor_msgs.CompressedImage;
  */
 
 //public class CardboardOverlayView<T> extends LinearLayout implements NodeMain{
-public class CardboardOverlayView extends LinearLayout implements NodeMain{
+public class GVROverlayView extends LinearLayout implements NodeMain{
 
     public enum Side {
         LEFT(0), RIGHT(1);
@@ -81,8 +81,8 @@ public class CardboardOverlayView extends LinearLayout implements NodeMain{
 
 
     private static final String TAG = "CardboardOverlayView";
-    private CardboardOverlayEyeView mLeftView;
-    private CardboardOverlayEyeView mRightView;
+    private GVROverlayEyeView mLeftView;
+    private GVROverlayEyeView mRightView;
     AttributeSet attrs;
 
 //    private static final String  LEFT_CAM="/left_wrist_camera/color/image_raw/compressed";
@@ -149,11 +149,11 @@ public class CardboardOverlayView extends LinearLayout implements NodeMain{
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
         params.setMargins(0, 0, 0, 0);
 
-        mLeftView = new CardboardOverlayEyeView(getContext(), attrs, topics.get(sel), CompressedImage._TYPE);
+        mLeftView = new GVROverlayEyeView(getContext(), attrs, topics.get(sel), CompressedImage._TYPE);
         mLeftView.setLayoutParams(params);
         addView(mLeftView);
 
-        mRightView = new CardboardOverlayEyeView(getContext(), attrs, topics.get(sel), CompressedImage._TYPE);
+        mRightView = new GVROverlayEyeView(getContext(), attrs, topics.get(sel), CompressedImage._TYPE);
         mRightView.setLayoutParams(params);
         addView(mRightView);
 
@@ -163,7 +163,7 @@ public class CardboardOverlayView extends LinearLayout implements NodeMain{
         setVisibility(View.VISIBLE);
     }
 
-    public CardboardOverlayView(Context context, AttributeSet attrs) {
+    public GVROverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.sel = TopicLabel.HEAD_CAM;
         topics= new HashMap<TopicLabel, String>();

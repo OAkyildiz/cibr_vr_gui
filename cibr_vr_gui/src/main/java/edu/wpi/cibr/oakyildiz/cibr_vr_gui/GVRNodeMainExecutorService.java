@@ -12,21 +12,21 @@ import android.os.IBinder;
 import org.ros.android.NodeMainExecutorService;
 import org.ros.node.NodeMainExecutor;
 
-public class CardboardNodeMainExecutorService extends NodeMainExecutorService implements NodeMainExecutor {
-    private final IBinder cardboardBinder = new CardboardNodeMainExecutorService.CardboardLocalBinder();
+public class GVRNodeMainExecutorService extends NodeMainExecutorService implements NodeMainExecutor {
+    private final IBinder gvrBinder = new GVRNodeMainExecutorService.CardboardLocalBinder();
 
     public class CardboardLocalBinder extends Binder {
         CardboardLocalBinder() {
         }
 
-        CardboardNodeMainExecutorService getService() {
-            return CardboardNodeMainExecutorService.this;
+        GVRNodeMainExecutorService getService() {
+            return GVRNodeMainExecutorService.this;
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return this.cardboardBinder;
+        return this.gvrBinder;
     }
 
 

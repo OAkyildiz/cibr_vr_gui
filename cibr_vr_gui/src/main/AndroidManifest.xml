@@ -15,7 +15,7 @@
 
 
         <activity
-            android:name=".CardboardViewerActivity"
+            android:name=".VRViewerActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize">
@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name="edu.wpi.cibr.oakyildiz.cibr_vr_gui.CardboardNodeMainExecutorService"/>
+        <service android:name="edu.wpi.cibr.oakyildiz.cibr_vr_gui.GVRNodeMainExecutorService"/>
     </application>
 
     <uses-feature

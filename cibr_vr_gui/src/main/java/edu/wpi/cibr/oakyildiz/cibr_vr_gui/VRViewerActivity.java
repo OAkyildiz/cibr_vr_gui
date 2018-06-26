@@ -22,10 +22,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.google.vrtoolkit.cardboard.CardboardView;
-import com.google.vrtoolkit.cardboard.Eye;
-import com.google.vrtoolkit.cardboard.HeadTransform;
-import com.google.vrtoolkit.cardboard.Viewport;
+
+import com.google.vr.sdk.base.GvrView;
+import com.google.vr.sdk.base.Eye;
+import com.google.vr.sdk.base.HeadTransform;
+import com.google.vr.sdk.base.Viewport;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
@@ -39,18 +40,18 @@ import javax.microedition.khronos.egl.EGLConfig;
 /**
  * A Cardboard sample application.
  */
-public class CardboardViewerActivity extends RosCardboardActivity implements CardboardView.StereoRenderer {
+public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRenderer {
     static final int ROS_REFRESH_PER_SEC = 1;
 
     private static final String TAG = "MainActivity";
-    private CardboardOverlayView mOverlayView;
-    private CardboardView cardboardView;
+    private GVROverlayView mOverlayView;
+    private GvrView gvrView;
 
     private RosMultiImageView rightRosImageView, leftRosImageView;
     //private View.OnTouchListenter touchListener;
     
     
-    public CardboardViewerActivity() {
+    public VRViewerActivity() {
         super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://trina-server.wpi.edu:11311"));
 //        super("Cardboard", "Cardboard");
     
@@ -60,9 +61,9 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         //mOverlayView.setMessageType();
-        rightRosImageView = mOverlayView.getRosImageView(CardboardOverlayView.Side.RIGHT);
-        leftRosImageView = mOverlayView.getRosImageView(CardboardOverlayView.Side.LEFT);
-        init(cardboardNodeMainExecutorService);
+        rightRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.RIGHT);
+        leftRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.LEFT);
+        init(GVRNodeMainExecutorService);
     }
 
     
@@ -76,11 +77,11 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_cardboard_viewer);
-        cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
-        cardboardView.setRenderer(this);
-        setCardboardView(cardboardView);
+        gvrView = (GvrView) findViewById(R.id.cardboard_view);
+        gvrView.setRenderer(this);
+        setGvrView(gvrView);
 
-        mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
+        mOverlayView = (GVROverlayView) findViewById(R.id.overlay);
         mOverlayView.setTopicInformation();
         mOverlayView.setOnTouchListener(new View.OnTouchListener() {
             @Override

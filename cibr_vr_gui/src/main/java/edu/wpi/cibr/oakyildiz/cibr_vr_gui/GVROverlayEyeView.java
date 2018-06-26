@@ -12,13 +12,13 @@ import android.widget.TextView;
 
 import org.ros.android.BitmapFromCompressedImage;
 
-public class CardboardOverlayEyeView extends ViewGroup {
+public class GVROverlayEyeView extends ViewGroup {
         private final edu.wpi.cibr.oakyildiz.cibr_vr_gui.RosMultiImageView imageView;
         private final TextView textView;
         private float offset;
 
-        public CardboardOverlayEyeView(Context context, AttributeSet attrs,
-                                       String topicName, String messageType) {
+        public GVROverlayEyeView(Context context, AttributeSet attrs,
+                                 String topicName, String messageType) {
             super(context, attrs);
             imageView = new RosMultiImageView(context, attrs);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);

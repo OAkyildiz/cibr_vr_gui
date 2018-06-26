@@ -24,7 +24,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 
 import com.google.common.base.Preconditions;
-import com.google.vrtoolkit.cardboard.CardboardActivity;
+import com.google.vr.sdk.base.GvrActivity;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.MasterChooser;
@@ -42,7 +42,7 @@ import java.net.URISyntaxException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class RosCardboardActivity extends CardboardActivity {
+public abstract class RosVRActivity extends GvrActivity {
 
     private static final int MASTER_CHOOSER_REQUEST_CODE = 0;
 
@@ -55,7 +55,7 @@ public abstract class RosCardboardActivity extends CardboardActivity {
     private final String notificationTicker;
     private final String notificationTitle;
 
-    protected CardboardNodeMainExecutorService cardboardNodeMainExecutorService;
+    protected GVRNodeMainExecutorService GVRNodeMainExecutorService;
 
     private final class CardboardNodeMainExecutorServiceConnection implements ServiceConnection {
         
@@ -69,19 +69,19 @@ public abstract class RosCardboardActivity extends CardboardActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
-            cardboardNodeMainExecutorService = ((CardboardNodeMainExecutorService.CardboardLocalBinder) binder).getService();
+            GVRNodeMainExecutorService = ((GVRNodeMainExecutorService.CardboardLocalBinder) binder).getService();
 
             if (customMasterUri != null) {
-                cardboardNodeMainExecutorService.setMasterUri(customMasterUri);
-                cardboardNodeMainExecutorService.setRosHostname(getDefaultHostAddress());
+                GVRNodeMainExecutorService.setMasterUri(customMasterUri);
+                GVRNodeMainExecutorService.setRosHostname(getDefaultHostAddress());
             }
-            cardboardNodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
+            GVRNodeMainExecutorService.addListener(new NodeMainExecutorServiceListener() {
                 @Override
                 public void onShutdown(NodeMainExecutorService nodeMainExecutorService) {
                     // We may have added multiple shutdown listeners and we only want to
                     // call finish() once.
-                    if (!RosCardboardActivity.this.isFinishing()) {
-                        RosCardboardActivity.this.finish();
+                    if (!RosVRActivity.this.isFinishing()) {
+                        RosVRActivity.this.finish();
                     }
                 }
             });
@@ -97,11 +97,11 @@ public abstract class RosCardboardActivity extends CardboardActivity {
         }
     }
 
-    protected RosCardboardActivity(String notificationTicker, String notificationTitle) {
+    protected RosVRActivity(String notificationTicker, String notificationTitle) {
         this(notificationTicker, notificationTitle, null);
     }
 
-    protected RosCardboardActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
+    protected RosVRActivity(String notificationTicker, String notificationTitle, URI customMasterUri) {
         super();
         this.notificationTicker = notificationTicker;
         this.notificationTitle = notificationTitle;
@@ -115,7 +115,7 @@ public abstract class RosCardboardActivity extends CardboardActivity {
     }
 
     protected void bindNodeMainExecutorService() {
-        Intent intent = new Intent(this, CardboardNodeMainExecutorService.class);
+        Intent intent = new Intent(this, GVRNodeMainExecutorService.class);
         intent.setAction(ACTION_START);
         intent.putExtra(EXTRA_NOTIFICATION_TICKER, notificationTicker);
         intent.putExtra(EXTRA_NOTIFICATION_TITLE, notificationTitle);
@@ -139,7 +139,7 @@ public abstract class RosCardboardActivity extends CardboardActivity {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                RosCardboardActivity.this.init(cardboardNodeMainExecutorService);
+                RosVRActivity.this.init(GVRNodeMainExecutorService);
                 return null;
             }
         }.execute();
@@ -163,13 +163,13 @@ public abstract class RosCardboardActivity extends CardboardActivity {
     }
 
     public URI getMasterUri() {
-        Preconditions.checkNotNull(cardboardNodeMainExecutorService);
-        return cardboardNodeMainExecutorService.getMasterUri();
+        Preconditions.checkNotNull(GVRNodeMainExecutorService);
+        return GVRNodeMainExecutorService.getMasterUri();
     }
 
     public String getRosHostname() {
-        Preconditions.checkNotNull(cardboardNodeMainExecutorService);
-        return cardboardNodeMainExecutorService.getRosHostname();
+        Preconditions.checkNotNull(GVRNodeMainExecutorService);
+        return GVRNodeMainExecutorService.getRosHostname();
     }
 
     @Override
@@ -196,9 +196,9 @@ public abstract class RosCardboardActivity extends CardboardActivity {
                         throw new RosRuntimeException(e);
                     }
                 }
-                cardboardNodeMainExecutorService.setRosHostname(host);
+                GVRNodeMainExecutorService.setRosHostname(host);
                 if (data.getBooleanExtra("ROS_MASTER_CREATE_NEW", false)) {
-                    cardboardNodeMainExecutorService.startMaster(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
+                    GVRNodeMainExecutorService.startMaster(data.getBooleanExtra("ROS_MASTER_PRIVATE", true));
                 } else {
                     URI uri;
                     try {
@@ -206,19 +206,19 @@ public abstract class RosCardboardActivity extends CardboardActivity {
                     } catch (URISyntaxException e) {
                         throw new RosRuntimeException(e);
                     }
-                    cardboardNodeMainExecutorService.setMasterUri(uri);
+                    GVRNodeMainExecutorService.setMasterUri(uri);
                 }
                 // Run init() in a new thread as a convenience since it often requires network access.
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {
-                        RosCardboardActivity.this.init(cardboardNodeMainExecutorService);
+                        RosVRActivity.this.init(GVRNodeMainExecutorService);
                         return null;
                     }
                 }.execute();
             } else {
                 // Without a master URI configured, we are in an unusable state.
-                cardboardNodeMainExecutorService.forceShutdown();
+                GVRNodeMainExecutorService.forceShutdown();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
