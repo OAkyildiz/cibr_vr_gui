@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.cloudspace.cardboard;
+package edu.wpi.cibr.oakyildiz.cibr_vr_gui;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -58,7 +58,8 @@ public abstract class RosCardboardActivity extends CardboardActivity {
     protected CardboardNodeMainExecutorService cardboardNodeMainExecutorService;
 
     private final class CardboardNodeMainExecutorServiceConnection implements ServiceConnection {
-
+        
+      
         private URI customMasterUri;
 
         public CardboardNodeMainExecutorServiceConnection(URI customUri) {

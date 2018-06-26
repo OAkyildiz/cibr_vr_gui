@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package com.cloudspace.cardboard;
+package edu.wpi.cibr.oakyildiz.cibr_vr_gui;
 
 import android.content.Intent;
 import android.os.Binder;

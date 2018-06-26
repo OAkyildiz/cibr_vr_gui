@@ -1,4 +1,4 @@
-package com.cloudspace.cardboard;
+package edu.wpi.cibr.oakyildiz.cibr_vr_gui;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,17 +11,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.ros.android.BitmapFromCompressedImage;
-import org.ros.android.view.RosImageView;
 
 public class CardboardOverlayEyeView extends ViewGroup {
-        private final RosImageView imageView;
+        private final edu.wpi.cibr.oakyildiz.cibr_vr_gui.RosMultiImageView imageView;
         private final TextView textView;
         private float offset;
 
         public CardboardOverlayEyeView(Context context, AttributeSet attrs,
                                        String topicName, String messageType) {
             super(context, attrs);
-            imageView = new RosImageView(context, attrs);
+            imageView = new RosMultiImageView(context, attrs);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);  // Preserve aspect ratio.
             imageView.setTopicName(topicName);
@@ -88,7 +87,7 @@ public class CardboardOverlayEyeView extends ViewGroup {
                     (int) (leftMargin + width), (int) (topMargin + height * (1.0f - verticalTextPos)));
         }
 
-    public RosImageView getImageView() {
+    public RosMultiImageView getImageView() {
         return imageView;
     }
 }

@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.cloudspace.cardboard;
+package edu.wpi.cibr.oakyildiz.cibr_vr_gui;
+
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 
 import com.google.vrtoolkit.cardboard.CardboardView;
 import com.google.vrtoolkit.cardboard.Eye;
@@ -25,15 +28,13 @@ import com.google.vrtoolkit.cardboard.HeadTransform;
 import com.google.vrtoolkit.cardboard.Viewport;
 
 import org.ros.address.InetAddressFactory;
-import org.ros.android.view.RosImageView;
 import org.ros.namespace.GraphName;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
+
 import java.net.URI;
 
 import javax.microedition.khronos.egl.EGLConfig;
-
-import sensor_msgs.CompressedImage;
 
 /**
  * A Cardboard sample application.
@@ -43,21 +44,28 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
 
     private static final String TAG = "MainActivity";
     private CardboardOverlayView mOverlayView;
-    private RosImageView rightRosImageView, leftRosImageView;
+    private CardboardView cardboardView;
 
+    private RosMultiImageView rightRosImageView, leftRosImageView;
+    //private View.OnTouchListenter touchListener;
+    
+    
     public CardboardViewerActivity() {
-        super("Ardrobot is running.", "Ardrobot", URI.create("http://10.100.4.65:11311"));
+        super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://trina-server.wpi.edu:11311"));
 //        super("Cardboard", "Cardboard");
+    
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        //mOverlayView.setMessageType();
         rightRosImageView = mOverlayView.getRosImageView(CardboardOverlayView.Side.RIGHT);
         leftRosImageView = mOverlayView.getRosImageView(CardboardOverlayView.Side.LEFT);
         init(cardboardNodeMainExecutorService);
     }
 
+    
     /**
      * Sets the view to our CardboardView and initializes the transformation matrices we will use
      * to render our scene.
@@ -68,14 +76,41 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_cardboard_viewer);
-        CardboardView cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
+        cardboardView = (CardboardView) findViewById(R.id.cardboard_view);
         cardboardView.setRenderer(this);
         setCardboardView(cardboardView);
 
         mOverlayView = (CardboardOverlayView) findViewById(R.id.overlay);
-        mOverlayView.setTopicInformation("/camera/image/compressed", CompressedImage._TYPE);
-    }
+        mOverlayView.setTopicInformation();
+        mOverlayView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
 
+            // get pointer index from the event object
+              int pointerIndex = event.getActionIndex();
+
+              // get pointer ID
+              int pointerId = event.getPointerId(pointerIndex);
+
+              // get masked (not specific to a pointer) action
+              int maskedAction = event.getActionMasked();
+
+              switch (maskedAction) {
+                case MotionEvent.ACTION_DOWN: return true;
+                case MotionEvent.ACTION_UP: {
+                    mOverlayView.switch_camera();
+
+                  return true;
+                  }
+              }
+              return false;
+            }
+          });
+    }
+    
+
+
+    
     @Override
     public void onRendererShutdown() {
         Log.i(TAG, "onRendererShutdown");
@@ -116,6 +151,7 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
     public void onFinishFrame(Viewport viewport) {
     }
 
+ 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
         if (rightRosImageView != null && nodeMainExecutor != null) {
@@ -126,8 +162,17 @@ public class CardboardViewerActivity extends RosCardboardActivity implements Car
                     .setMasterUri(getMasterUri());
             leftImageViewConfig.setNodeName(GraphName.of("left_eye"));
 
+            NodeConfiguration cibrVRNodeConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
+                    .setMasterUri(getMasterUri());
+            cibrVRNodeConfig.setNodeName(GraphName.of("cibr_vr_gui"));
+
             nodeMainExecutor.execute(rightRosImageView, rightImageViewConfig);
             nodeMainExecutor.execute(leftRosImageView, leftImageViewConfig);
+            nodeMainExecutor.execute(mOverlayView, cibrVRNodeConfig);
+
         }
     }
+
+
+
 }
