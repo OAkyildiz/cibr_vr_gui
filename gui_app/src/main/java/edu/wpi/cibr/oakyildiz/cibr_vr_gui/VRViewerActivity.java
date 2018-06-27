@@ -54,7 +54,7 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
     public VRViewerActivity() {
         super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://trina-server.wpi.edu:11311"));
 //        super("Cardboard", "Cardboard");
-    
+
     }
 
     @Override
@@ -87,26 +87,27 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-            // get pointer index from the event object
-              int pointerIndex = event.getActionIndex();
+                // get pointer index from the event object
+                int pointerIndex = event.getActionIndex();
 
-              // get pointer ID
-              int pointerId = event.getPointerId(pointerIndex);
+                // get pointer ID
+                int pointerId = event.getPointerId(pointerIndex);
 
-              // get masked (not specific to a pointer) action
-              int maskedAction = event.getActionMasked();
+                // get masked (not specific to a pointer) action
+                int maskedAction = event.getActionMasked();
 
-              switch (maskedAction) {
-                case MotionEvent.ACTION_DOWN: return true;
-                case MotionEvent.ACTION_UP: {
-                    mOverlayView.switch_camera();
+                switch (maskedAction) {
+                    case MotionEvent.ACTION_DOWN: return true;
+                    case MotionEvent.ACTION_UP: {
+                        mOverlayView.switch_camera();
 
-                  return true;
-                  }
-              }
-              return false;
+                        return true;
+                    }
+                }
+                return false;
             }
-          });
+        });
+
     }
     
 
