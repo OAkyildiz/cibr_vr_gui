@@ -167,11 +167,15 @@ public class GVROverlayView extends LinearLayout implements NodeMain{
         super(context, attrs);
         this.sel = TopicLabel.HEAD_CAM;
         topics= new HashMap<TopicLabel, String>();
-        topics.put(TopicLabel.LEFT_CAM, "/left_wrist_camera/color/image_raw/compressed");
-        topics.put(TopicLabel.RIGHT_CAM, "/right_wrist_camera/color/image_raw/compressed");
-        topics.put(TopicLabel.HEAD_CAM, "/cibr_webcam/image_raw/compressed");
-        topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
+//        topics.put(TopicLabel.LEFT_CAM, "/left_wrist_camera/color/image_raw/compressed");
+//        topics.put(TopicLabel.RIGHT_CAM, "/right_wrist_camera/color/image_raw/compressed");
+//        topics.put(TopicLabel.HEAD_CAM, "/cibr_webcam/image_raw/compressed");
+//        topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
 
+        topics.put(TopicLabel.LEFT_CAM, "/h_left_wrist_cam/image_raw/compressed");
+        topics.put(TopicLabel.RIGHT_CAM, "/h_right_wrist_cam/image_raw/compressed");
+        topics.put(TopicLabel.HEAD_CAM, "/h_head_cam/image_raw/compressed");
+        topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
         this.attrs = attrs;
         setOrientation(HORIZONTAL);
     }
