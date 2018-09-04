@@ -53,7 +53,7 @@ public class GVROverlayView extends LinearLayout implements NodeMain{
         }
     }
 
-    private enum TopicLabel{HEAD_CAM(0), LEFT_CAM(1), RIGHT_CAM(2), WORKSPACE_CAM(3);
+    private enum TopicLabel{HEAD_CAM(0), LEFT_CAM(1), RIGHT_CAM(2), WORKSPACE_CAM(3), BODY_CAM(4);
 
         private int num;
 
@@ -176,6 +176,8 @@ public class GVROverlayView extends LinearLayout implements NodeMain{
         topics.put(TopicLabel.RIGHT_CAM, "/h_right_wrist_cam/image_raw/compressed");
         topics.put(TopicLabel.HEAD_CAM, "/h_head_cam/image_raw/compressed");
         topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
+        topics.put(TopicLabel.BODY_CAM, "/workspace_cam/image_raw/compressed");
+
         this.attrs = attrs;
         setOrientation(HORIZONTAL);
     }
@@ -195,8 +197,10 @@ public class GVROverlayView extends LinearLayout implements NodeMain{
         if (cmd.contains("camera") || cmd.contains("switch")) {
             if (cmd.contains("head"))
                 switch_camera(TopicLabel.HEAD_CAM);
-            else if (cmd.contains("workspace"))
+            else if (cmd.contains("workspace") || cmd.contains("third"))
                 switch_camera(TopicLabel.WORKSPACE_CAM);
+            else if (cmd.contains("torso") || cmd.contains("chest") || cmd.contains("clavicle") || cmd.contains("body"))
+                switch_camera(TopicLabel.BODY_CAM);
             else if (cmd.contains("left"))
                 switch_camera(TopicLabel.LEFT_CAM);
             else if (cmd.contains("right"))

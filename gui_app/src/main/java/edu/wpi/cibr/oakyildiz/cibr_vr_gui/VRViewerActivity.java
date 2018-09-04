@@ -52,7 +52,7 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
     
     
     public VRViewerActivity() {
-        super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://trina-server.wpi.edu:11311"));
+        super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://1309.215.206.242:11311"));
 //        super("Cardboard", "Cardboard");
 
     }
