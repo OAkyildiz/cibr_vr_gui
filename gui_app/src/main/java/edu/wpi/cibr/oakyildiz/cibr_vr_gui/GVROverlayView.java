@@ -39,6 +39,7 @@ import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -109,6 +110,7 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
 
         topics = new HashMap<>( (Map<String, String>)rosparams.getMap("/cameras/topic"));
         labels = new ArrayList<>(topics.keySet());
+        Collections.sort(labels);
         sel = 0;
 
     }
