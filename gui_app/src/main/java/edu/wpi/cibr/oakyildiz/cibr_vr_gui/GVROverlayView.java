@@ -25,17 +25,24 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.ros.android.BitmapFromCompressedImage;
-import org.ros.android.MessageCallable;
-import org.ros.message.MessageListener;
-import org.ros.namespace.GraphName;
-import org.ros.node.ConnectedNode;
+import sensor_msgs.CompressedImage;
+
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.ConnectedNode;
+
+import org.ros.namespace.GraphName;
+import org.ros.node.parameter.ParameterTree;
+
+import org.ros.android.MessageCallable;
+import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
-import sensor_msgs.CompressedImage;
+import static com.google.vr.cardboard.ThreadUtils.runOnUiThread;
 
 
 /**
@@ -55,23 +62,85 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
         }
     }
 
-    private enum TopicLabel{HEAD_CAM(0), LEFT_CAM(1), RIGHT_CAM(2), WORKSPACE_CAM(3), BODY_CAM(4);
+//    private enum TopicLabel{HEAD_CAM(0), LEFT_CAM(1), RIGHT_CAM(2), WORKSPACE_CAM(3), BODY_CAM(4);
+//
+//        private int num;
 
-        private int num;
+//        TopicLabel(int num) { this.num = num;  }
+//        public int getNum() { return num; }
+//        public TopicLabel next(){ return values()[(ordinal() + 1)%values().length]; }
+//    }
 
-        TopicLabel(int num) {
-            this.num = num;
+    /*** Camera Topics and Parameters ***/
+
+    int sel = 0;
+    private static HashMap<String,String> topics;
+    String transport = "/compressed"; //Infrastructure to get this from param tree is ready
+    ArrayList<String> labels;
+    ParameterTree rosparams;
+
+    public void parse_command(String cmd) {
+
+        if (cmd.contains("camera") || cmd.contains("switch")) {
+            for (String lbl : topics.keySet()){
+                if (cmd.contains(lbl)) {
+                    setIndex(lbl);
+                }
+            }
+            setIndex();
+            switch_camera();
+            //todo: make another dict of alternative words for each label.
         }
-
-        public int getNum() {
-            return num;
+        else if (cmd.contains("update")) {
+            getCameras();
+            makeToast("Updated camera list");
         }
-
-        public TopicLabel next(){
-            return values()[(ordinal() + 1)%values().length];
-        }
+        else
+            makeToast(String.format("Didn't understand \'%s\' :(",cmd));
     }
 
+
+    private void getCameras() {
+//        ParameterTree param = node.newParameterTree();
+//        GraphName paramNamespace = new GraphName(param.getString("parameter_namespace"));
+//        NameResolver resolver = node.getResolver().newChild(paramNamespace);
+//        Map setttings_map = param.getMap(resolver.resolve("setttings"));
+        //Map topicMap = (Map<String, String>)params.getMap("/camera_topics");
+
+        topics = new HashMap<>( (Map<String, String>)rosparams.getMap("/cameras/topic"));
+        labels = new ArrayList<>(topics.keySet());
+        sel = 0;
+
+    }
+    //TODO: jsut combine this, make method private and only set Sel (name in honorably)
+    public void setIndex() {
+        sel=(sel+1)%labels.size();
+    }
+
+    public void setIndex(String s) {
+        sel=labels.indexOf(s);
+
+    }
+
+    public void switch_camera(){
+        String tpc=topics.get(labels.get(sel));
+        setImgTopic(tpc);
+        subscribe();
+        //rightEyeImageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+        //leftEyeImageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+        makeToast(String.format("%d: %s",sel,get_namespace(tpc)));
+    }
+
+    private void makeToast(String string){
+        Context context = getContext();
+        CharSequence text = string;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(context, text, duration);
+        toast.show();
+    }
+
+    /*********/
     private String stringCmdTopic = "transcript";
     private String messageType = std_msgs.String._TYPE;
     //private StringCommandParser cmdPrser;
@@ -85,7 +154,7 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
     private Subscriber<std_msgs.String> cmdSubscriber;
 
 
-    public void setImgTopic(String topicName) { this.imgTopic = topicName; }
+    public void setImgTopic(String topicName) { this.imgTopic = topicName + transport; }
 
     public void setImgMsgType(String messageType) {
         this.imgMsgType = messageType;
@@ -100,14 +169,14 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
     AttributeSet attrs;
 
 
-
+    /// OLD way
    // private String[] topics = {LEFT_CAM, RIGHT_CAM, HEAD_CAM, WORKSPACE_CAM};
-    private TopicLabel sel;
-    private static HashMap<TopicLabel,String> topics;
+//    private TopicLabel sel;
+//    private static HashMap<TopicLabel,String> topics;
 
     public static String get_namespace(String topic){
 
-        return topic.split("/")[1];
+        return topic.split("/")[0];
     }
     @Override
     public GraphName getDefaultNodeName() {
@@ -118,9 +187,10 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
     @Override
     public void onStart(ConnectedNode connectedNode) {
         node = connectedNode;
+        rosparams = node.getParameterTree();
+        getCameras();
 
-
-        setImgTopic(topics.get(sel));
+        setImgTopic(topics.get(labels.get(sel)));
         setImgMsgType(CompressedImage._TYPE);
         setMsgToBitmapCallable(new BitmapFromCompressedImage());
 
@@ -142,27 +212,41 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
 
     //get params here?
        // while(mRightView.getImageView() == null || mLeftView.getImageView() == null);;
-        mLeftView = new GVROverlayEyeView(getContext(), attrs);
-        mRightView = new GVROverlayEyeView(getContext(), attrs);
 
-       LayoutParams params = new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
-        params.setMargins(0, 0, 0, 0);
+        // addView doesn't like this being in a seperate function, which ends up creating a sub thread.\
+        /**** This is setImgViews()// Which used to be //setTopicInformation  ****/
+        runOnUiThread(new Runnable() {
 
-        mLeftView.setLayoutParams(params);
-        //addView(mLeftView);
+            @Override
+            public void run() {
 
-        //mRightView = new GVROverlayEyeView(getContext(), attrs);
-        mRightView.setLayoutParams(params);
-        //addView(mRightView);
+                mLeftView = new GVROverlayEyeView(getContext(), attrs);
+                mRightView = new GVROverlayEyeView(getContext(), attrs);
 
-        // Set some reasonable defaults.
-        setDepthOffset(0.016f);
-        setColor(Color.rgb(150, 255, 180));
-        setVisibility(View.VISIBLE);
-        addView(mRightView);
-        addView(mLeftView);
+                LayoutParams params = new LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
+                params.setMargins(0, 0, 0, 0);
+
+                mLeftView.setLayoutParams(params);
+                //addView(mLeftView);
+
+                //mRightView = new GVROverlayEyeView(getContext(), attrs);
+                mRightView.setLayoutParams(params);
+                //addView(mRightView);
+
+                // Set some reasonable defaults.
+                setDepthOffset(0.016f);
+                setColor(Color.rgb(150, 255, 180));
+                setVisibility(View.VISIBLE);
+                addView(mRightView);
+                addView(mLeftView);
+
+            }
+        });
+
+        /***********/
         subscribe();
+
     }
 
 
@@ -208,7 +292,9 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
         return side == Side.RIGHT ? mRightView.getImageView() : mLeftView.getImageView();
     }
 
-    public void setImgViewAndParams() {
+
+    //Since we are not creating the image view here
+    public void setImgViews() {
         LayoutParams params = new LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
         params.setMargins(0, 0, 0, 0);
@@ -228,20 +314,6 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
 
     public GVROverlayView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.sel = TopicLabel.HEAD_CAM;
-
-
-        topics= new HashMap<TopicLabel, String>();
-//        topics.put(TopicLabel.LEFT_CAM, "/left_wrist_camera/color/image_raw/compressed");
-//        topics.put(TopicLabel.RIGHT_CAM, "/right_wrist_camera/color/image_raw/compressed");
-//        topics.put(TopicLabel.HEAD_CAM, "/cibr_webcam/image_raw/compressed");
-//        topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
-
-        topics.put(TopicLabel.LEFT_CAM, "/h_left_wrist_cam/image_raw/compressed");
-        topics.put(TopicLabel.RIGHT_CAM, "/h_right_wrist_cam/image_raw/compressed");
-        topics.put(TopicLabel.HEAD_CAM, "/h_head_cam/image_raw/compressed");
-        topics.put(TopicLabel.WORKSPACE_CAM, "/workspace_cam/image_raw/compressed");
-        topics.put(TopicLabel.BODY_CAM, "/workspace_cam/image_raw/compressed");
 
         this.attrs = attrs;
         setOrientation(HORIZONTAL);
@@ -258,54 +330,30 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
         mLeftView.setColor(color);
         mRightView.setColor(color);
     }
+// Old One
+//    public void parse_command(String cmd) {
+//
+//        if (cmd.contains("camera") || cmd.contains("switch")) {
+//            if (cmd.contains("head"))
+//                setIndex(TopicLabel.HEAD_CAM);
+//            else if (cmd.contains("workspace") || cmd.contains("third"))
+//                setIndex(TopicLabel.WORKSPACE_CAM);
+//            else if (cmd.contains("torso") || cmd.contains("chest") || cmd.contains("clavicle") || cmd.contains("body"))
+//                setIndex(TopicLabel.BODY_CAM);
+//            else if (cmd.contains("left"))
+//                setIndex(TopicLabel.LEFT_CAM);
+//            else if (cmd.contains("right"))
+//                setIndex(TopicLabel.RIGHT_CAM);
+//            else
+//                setIndex();
+//            switch_camera();
+//        }
+//        else if(cmd.contains("update")){
+//            //here update topic list
+//        }
+//
+//        else
+//            makeToast(String.format("Didn't understand \'%s\' :(",cmd));
+//    }
 
-    public void parse_command(String cmd) {
-
-        if (cmd.contains("camera") || cmd.contains("switch")) {
-            if (cmd.contains("head"))
-                setIndex(TopicLabel.HEAD_CAM);
-            else if (cmd.contains("workspace") || cmd.contains("third"))
-                setIndex(TopicLabel.WORKSPACE_CAM);
-            else if (cmd.contains("torso") || cmd.contains("chest") || cmd.contains("clavicle") || cmd.contains("body"))
-                setIndex(TopicLabel.BODY_CAM);
-            else if (cmd.contains("left"))
-                setIndex(TopicLabel.LEFT_CAM);
-            else if (cmd.contains("right"))
-                setIndex(TopicLabel.RIGHT_CAM);
-            else
-                setIndex();
-            switch_camera();
-        }
-        else if(cmd.contains("update")){
-            //here update topic list
-        }
-
-        else
-            makeToast(String.format("Didn't understand \'%s\' :(",cmd));
-    }
-    //TODO: jsut combine this, make method private and only set Sel (name in honorably)
-    public void setIndex() {
-        sel=sel.next();
-    }
-
-    public void setIndex(TopicLabel s) {
-        sel = s;
-    }
-
-    public void switch_camera(){
-        setImgTopic(topics.get(sel));
-        subscribe();
-        //rightEyeImageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
-        //leftEyeImageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
-        makeToast(String.format("%d: %s",sel.getNum(),get_namespace(topics.get(sel))));
-    }
-
-    private void makeToast(String string){
-        Context context = getContext();
-        CharSequence text = string;
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-    }
 }

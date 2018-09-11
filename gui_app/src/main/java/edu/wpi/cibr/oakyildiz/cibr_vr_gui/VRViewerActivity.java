@@ -141,36 +141,25 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
      * @param headTransform The head transformation in the new frame.
      */
     @Override
-    public void onNewFrame(HeadTransform headTransform) {
-    }
+    public void onNewFrame(HeadTransform headTransform) { }
 
     @Override
-    public void onDrawEye(Eye eye) {
-
-    }
+    public void onDrawEye(Eye eye) { }
 
 
     @Override
-    public void onFinishFrame(Viewport viewport) {
-    }
+    public void onFinishFrame(Viewport viewport) { }
 
  
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
         if (mOverlayView != null && nodeMainExecutor != null) {
-//            NodeConfiguration rightImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
-//                    .setMasterUri(getMasterUri());
-//            rightImageViewConfig.setNodeName(GraphName.of("right_eye"));
-//            NodeConfiguration leftImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
-//                    .setMasterUri(getMasterUri());
-//            leftImageViewConfig.setNodeName(GraphName.of("left_eye"));
+
 
             NodeConfiguration cibrVRNodeConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
                     .setMasterUri(getMasterUri());
             cibrVRNodeConfig.setNodeName(GraphName.of("cibr_vr_gui"));
 
-            //nodeMainExecutor.execute(rightRosImageView, rightImageViewConfig);
-            //nodeMainExecutor.execute(leftRosImageView, leftImageViewConfig);
             nodeMainExecutor.execute(mOverlayView, cibrVRNodeConfig);
 
         }
