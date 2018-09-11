@@ -1,6 +1,7 @@
 package edu.wpi.cibr.oakyildiz.cibr_vr_gui;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -17,15 +18,14 @@ public class GVROverlayEyeView extends ViewGroup {
         private final TextView textView;
         private float offset;
 
-        public GVROverlayEyeView(Context context, AttributeSet attrs,
-                                 String topicName, String messageType) {
+        public GVROverlayEyeView(Context context, AttributeSet attrs) {
             super(context, attrs);
             imageView = new RosMultiImageView(context, attrs);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setAdjustViewBounds(true);  // Preserve aspect ratio.
-            imageView.setTopicName(topicName);
-            imageView.setMessageType(messageType);
-            imageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+//            imageView.setTopicName(topicName);
+//            imageView.setMessageType(messageType);
+//          imageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
             addView(imageView);
 
             textView = new TextView(context, attrs);
@@ -51,6 +51,10 @@ public class GVROverlayEyeView extends ViewGroup {
 
         public void setOffset(float offset) {
             this.offset = offset;
+        }
+
+        public void setImageViewBitmap(Bitmap bm){
+            imageView.setImageBitmap(bm);
         }
 
         @Override

@@ -19,7 +19,7 @@ import org.ros.node.topic.Subscriber;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosMultiImageView<T> extends ImageView implements NodeMain {
+public class RosMultiImageView<T> extends ImageView{
 
   private ConnectedNode node;
   private String topicName;
@@ -52,56 +52,40 @@ public class RosMultiImageView<T> extends ImageView implements NodeMain {
   }
   //TODO:  pull out NodeMain implementation and place it in the container class, keep OnStart and call it from there
 
-  @Override
-  public GraphName getDefaultNodeName() {
-    return GraphName.of("ros_image_view");
-  }
-
-  @Override
-  public void onStart(ConnectedNode connectedNode) {
-    node = connectedNode;
-    subscriber = connectedNode.newSubscriber(topicName, messageType);
-    subscriber.addMessageListener(new MessageListener<T>() {
-      @Override
-      public void onNewMessage(final T message) {
-        post(new Runnable() {
-          @Override
-          public void run() {
-            setImageBitmap(callable.call(message));
-          }
-        });
-        postInvalidate();
-      }
-    });
-  }
-  
-  public void resubscribe(String newTopic){
-    subscriber.shutdown();
-    subscriber = node.newSubscriber(newTopic, messageType);
-    subscriber.addMessageListener(new MessageListener<T>() {
-       @Override
-       public void onNewMessage(final T message) {
-         post(new Runnable() {
-           @Override
-           public void run() {
-             setImageBitmap(callable.call(message));
-           }
-         });
-         postInvalidate();
-       }
-     });
-   }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
-  }
-
-  @Override
-  public void onError(Node node, Throwable throwable) {
-  }
+  //TODO: these go to the OverlayView
+//  @Override
+//  public GraphName getDefaultNodeName() {
+//    return GraphName.of("ros_image_view");
+//  }
+//
+//  @Override
+//  public void onStart(ConnectedNode connectedNode) {
+//    node = connectedNode;
+//    subscriber = connectedNode.newSubscriber(topicName, messageType);
+//    subscriber.addMessageListener(new MessageListener<T>() {
+//      @Override
+//      public void onNewMessage(final T message) {
+//        post(new Runnable() {
+//          @Override
+//          public void run() {
+//            setImageBitmap(callable.call(message));
+//          }
+//        });
+//        postInvalidate();
+//      }
+//    });
+//  }
+//
+//  @Override
+//  public void onShutdown(Node node) {
+//  }
+//
+//  @Override
+//  public void onShutdownComplete(Node node) {
+//  }
+//
+//  @Override
+//  public void onError(Node node, Throwable throwable) {
+//  }
 
 }

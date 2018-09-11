@@ -52,7 +52,7 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
     
     
     public VRViewerActivity() {
-        super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://1309.215.206.242:11311"));
+        super("CIBR VR GUI is running.", "CarboardROSView", URI.create("http://130.215.206.128:11311"));
 //        super("Cardboard", "Cardboard");
 
     }
@@ -61,8 +61,8 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         //mOverlayView.setMessageType();
-        rightRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.RIGHT);
-        leftRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.LEFT);
+        //rightRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.RIGHT);
+        //leftRosImageView = mOverlayView.getRosImageView(GVROverlayView.Side.LEFT);
         init(GVRNodeMainExecutorService);
     }
 
@@ -82,7 +82,7 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
         setGvrView(gvrView);
 
         mOverlayView = (GVROverlayView) findViewById(R.id.overlay);
-        mOverlayView.setTopicInformation();
+        //mOverlayView.setImgViewParams();
         mOverlayView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -99,6 +99,7 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
                 switch (maskedAction) {
                     case MotionEvent.ACTION_DOWN: return true;
                     case MotionEvent.ACTION_UP: {
+                        mOverlayView.setIndex();
                         mOverlayView.switch_camera();
 
                         return true;
@@ -156,20 +157,20 @@ public class VRViewerActivity extends RosVRActivity implements GvrView.StereoRen
  
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
-        if (rightRosImageView != null && nodeMainExecutor != null) {
-            NodeConfiguration rightImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
-                    .setMasterUri(getMasterUri());
-            rightImageViewConfig.setNodeName(GraphName.of("right_eye"));
-            NodeConfiguration leftImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
-                    .setMasterUri(getMasterUri());
-            leftImageViewConfig.setNodeName(GraphName.of("left_eye"));
+        if (mOverlayView != null && nodeMainExecutor != null) {
+//            NodeConfiguration rightImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
+//                    .setMasterUri(getMasterUri());
+//            rightImageViewConfig.setNodeName(GraphName.of("right_eye"));
+//            NodeConfiguration leftImageViewConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
+//                    .setMasterUri(getMasterUri());
+//            leftImageViewConfig.setNodeName(GraphName.of("left_eye"));
 
             NodeConfiguration cibrVRNodeConfig = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostName())
                     .setMasterUri(getMasterUri());
             cibrVRNodeConfig.setNodeName(GraphName.of("cibr_vr_gui"));
 
-            nodeMainExecutor.execute(rightRosImageView, rightImageViewConfig);
-            nodeMainExecutor.execute(leftRosImageView, leftImageViewConfig);
+            //nodeMainExecutor.execute(rightRosImageView, rightImageViewConfig);
+            //nodeMainExecutor.execute(leftRosImageView, leftImageViewConfig);
             nodeMainExecutor.execute(mOverlayView, cibrVRNodeConfig);
 
         }
