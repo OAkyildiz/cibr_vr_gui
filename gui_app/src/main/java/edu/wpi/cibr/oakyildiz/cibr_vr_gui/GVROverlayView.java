@@ -86,11 +86,14 @@ public class GVROverlayView<T> extends LinearLayout implements NodeMain{
             for (String lbl : topics.keySet()){
                 if (cmd.contains(lbl)) {
                     setIndex(lbl);
+                    switch_camera();
+                    return;
                 }
             }
             setIndex();
             switch_camera();
-            //todo: make another dict of alternative words for each label.
+            return;
+            //TODO: Probably wrap these three repeated lines
         }
         else if (cmd.contains("update")) {
             getCameras();
